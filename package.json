@@ -19,7 +19,7 @@
 		"q":"~1.0",
 		"q-io":"~1.11",
 		"joi":"~6.4",
-		"bunyan":"~1.2"
+		"bunyan":"~1.4"
 	},
 	"devDependencies":{
 		"gulp":"~3.8",
