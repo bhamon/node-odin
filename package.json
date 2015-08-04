@@ -16,9 +16,9 @@
 		"node":"~0.12"
 	},
 	"dependencies":{
-		"q":"~1.0",
-		"q-io":"~1.11",
-		"joi":"~6.4",
+		"q":"~1.4",
+		"q-io":"~1.13",
+		"joi":"~6.6",
 		"bunyan":"~1.4"
 	},
 	"devDependencies":{
