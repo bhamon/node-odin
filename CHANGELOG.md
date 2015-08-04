@@ -1,3 +1,7 @@
+### v0.1.3
+
+- Dependencies updated.
+
 ### v0.1.2
 
 - Method [Log#child] added.
