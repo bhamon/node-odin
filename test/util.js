@@ -39,7 +39,7 @@ describe('util', function() {
 
 		it('should return the validated data set', function() {
 			(function() {
-				lib.odin.util.validate('test', lib.deps.joi.string().uppercase().required()).should.be.a.String.which.is.equal('TEST');
+				lib.odin.util.validate('test', lib.deps.joi.string().uppercase().required()).should.be.an.instanceof(String).which.equal('TEST');
 			}).should.not.throw();
 		});
 	});
