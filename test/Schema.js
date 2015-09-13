@@ -7,7 +7,8 @@ var lib = {
 	},
 	odin:{
 		Exception:require('../lib/Exception'),
-		Schema:require('../lib/Schema')
+		Schema:require('../lib/Schema'),
+		SchemaField:require('../lib/SchemaField')
 	}
 };
 
@@ -38,8 +39,8 @@ describe('Schema', function() {
 		});
 
 		it('should be correctly initialized', function() {
-			var base;
-			var schema;
+			let base;
+			let schema;
 			(function() {
 				base = new lib.odin.Schema(true, [
 					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
@@ -58,12 +59,12 @@ describe('Schema', function() {
 			}).should.throw(TypeError);
 
 			schema.should.have.an.enumerable('abstract').which.is.equal(false);
-			schema.should.have.an.enumerable('parent').Object.which.is.instanceof(lib.odin.Schema);
+			schema.should.have.an.enumerable('parent').which.is.an.instanceof(lib.odin.Schema);
 		});
 	});
 
 	describe('#hasField()', function() {
-		var schema;
+		let schema;
 		before(function() {
 			schema = new lib.odin.Schema(false, [
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
@@ -82,8 +83,8 @@ describe('Schema', function() {
 	});
 
 	describe('#getField()', function() {
-		var schema;
-		var child;
+		let schema;
+		let child;
 		before(function() {
 			schema = new lib.odin.Schema(false, [
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
@@ -100,21 +101,21 @@ describe('Schema', function() {
 		});
 
 		it('should return provided fields', function() {
-			var id = schema.getField('id');
+			let id = schema.getField('id');
 			id.should.be.an.Object;
-			id.should.have.an.enumerable('name').String.which.equal('id');
-			id.should.have.an.enumerable('validator').Object;
-			id.should.have.an.enumerable('readOnly').Boolean.which.equal(true);
+			id.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('id');
+			id.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			id.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
 
-			var name = schema.getField('name');
+			let name = schema.getField('name');
 			name.should.be.an.Object;
-			name.should.have.an.enumerable('name').String.which.equal('name');
-			name.should.have.an.enumerable('validator').Object;
-			name.should.have.an.enumerable('readOnly').Boolean.which.equal(false);
+			name.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('name');
+			name.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			name.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(false);
 		});
 
 		it('should return inalterable fields', function() {
-			var id = schema.getField('id');
+			let id = schema.getField('id');
 
 			(function() {
 				id.name = 'test';
@@ -130,33 +131,33 @@ describe('Schema', function() {
 		});
 
 		it('should return children fields', function() {
-			var address = child.getField('address');
+			let address = child.getField('address');
 			address.should.be.an.Object;
-			address.should.have.an.enumerable('name').String.which.equal('address');
-			address.should.have.an.enumerable('validator').Object;
-			address.should.have.an.enumerable('readOnly').Boolean.which.equal(false);
+			address.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('address');
+			address.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			address.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(false);
 		});
 
 		it('should return parent fields', function() {
-			var id = child.getField('id');
+			let id = child.getField('id');
 			id.should.be.an.Object;
-			id.should.have.an.enumerable('name').String.which.equal('id');
-			id.should.have.an.enumerable('validator').Object;
-			id.should.have.an.enumerable('readOnly').Boolean.which.equal(true);
+			id.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('id');
+			id.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			id.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
 		});
 
 		it('should return overriden fields', function() {
-			var name = child.getField('name');
+			let name = child.getField('name');
 			name.should.be.an.Object;
-			name.should.have.an.enumerable('name').String.which.equal('name');
-			name.should.have.an.enumerable('validator').Object;
-			name.should.have.an.enumerable('readOnly').Boolean.which.equal(true);
+			name.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('name');
+			name.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			name.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
 		});
 	});
 
 	describe('#collectFields()', function() {
-		var schema;
-		var child;
+		let schema;
+		let child;
 		before(function() {
 			schema = new lib.odin.Schema(false, [
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
@@ -169,31 +170,34 @@ describe('Schema', function() {
 		});
 
 		it('should return all the provided fields with inheritance support', function() {
-			var fields = child.collectFields();
+			let fields = child.collectFields();
 
-			fields.should.be.an.Object;
-			fields.should.have.a.property('id').Object;
-			fields.should.have.a.property('name').Object;
-			fields.should.have.a.property('address').Object;
-			Object.keys(fields).length.should.be.equal(3);
+			fields.should.be.an.instanceof(Map);
+			fields.size.should.be.equal(3);
 
-			fields.id.should.have.an.enumerable('name').String.which.equal('id');
-			fields.id.should.have.an.enumerable('validator').Object;
-			fields.id.should.have.an.enumerable('readOnly').Boolean.which.equal(true);
+			let id = fields.get('id');
+			id.should.be.an.instanceof(lib.odin.SchemaField);
+			id.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('id');
+			id.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			id.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
 
-			fields.name.should.have.an.enumerable('name').String.which.equal('name');
-			fields.name.should.have.an.enumerable('validator').Object;
-			fields.name.should.have.an.enumerable('readOnly').Boolean.which.equal(true);
+			let name = fields.get('name');
+			name.should.be.an.instanceof(lib.odin.SchemaField);
+			name.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('name');
+			name.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			name.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
 
-			fields.address.should.have.an.enumerable('name').String.which.equal('address');
-			fields.address.should.have.an.enumerable('validator').Object;
-			fields.address.should.have.an.enumerable('readOnly').Boolean.which.equal(false);
+			let address = fields.get('address');
+			address.should.be.an.instanceof(lib.odin.SchemaField);
+			address.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('address');
+			address.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
+			address.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(false);
 		});
 	});
 
 	describe('#populate()', function() {
-		var schema;
-		var child;
+		let schema;
+		let child;
 		before(function() {
 			schema = new lib.odin.Schema(false, [
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
@@ -207,7 +211,7 @@ describe('Schema', function() {
 		});
 
 		it('should populate the provided object', function() {
-			var instance = {};
+			let instance = {};
 			child.populate(instance, {
 				id:2,
 				name:'John Doe',
@@ -215,10 +219,10 @@ describe('Schema', function() {
 				extra:'foo'
 			});
 
-			instance.should.have.an.enumerable('id').Number.which.equal(2);
+			instance.should.have.an.enumerable('id').which.is.an.instanceof(Number).and.equal(2);
 			instance.should.have.an.enumerable('stub').which.is.undefined;
-			instance.should.have.an.enumerable('name').String.which.equal('John Doe');
-			instance.should.have.an.enumerable('address').String.which.equal('1, Potato Plazza, Roma');
+			instance.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('John Doe');
+			instance.should.have.an.enumerable('address').which.is.an.instanceof(String).and.equal('1, Potato Plazza, Roma');
 			instance.should.not.have.an.enumerable('extra');
 
 			(function() {
@@ -237,8 +241,8 @@ describe('Schema', function() {
 	});
 
 	describe('#validate()', function() {
-		var schema;
-		var child;
+		let schema;
+		let child;
 		before(function() {
 			schema = new lib.odin.Schema(false, [
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
@@ -281,7 +285,7 @@ describe('Schema', function() {
 		});
 
 		it('should auto-correct fields', function() {
-			var instance = {
+			let instance = {
 				id:10,
 				name:'John Doe',
 				address:'1, rue de Paris',
@@ -294,8 +298,8 @@ describe('Schema', function() {
 
 			instance.name.should.be.equal('John Doe');
 			instance.address.should.be.equal('1, RUE DE PARIS');
-			instance.should.have.a.property('extra').String.which.equal('test');
-			instance.should.have.a.property('extraReadOnly').String.which.equal('foo');
+			instance.should.have.a.property('extra').which.is.an.instanceof(String).and.is.equal('test');
+			instance.should.have.a.property('extraReadOnly').which.is.an.instanceof(String).and.is.equal('foo');
 		});
 	});
 });
