@@ -1,9 +1,9 @@
 'use strict';
 
-var lib = {
+let lib = {
 	deps:{
 		joi:require('joi'),
-		should:require('should')
+		expect:require('chai').expect
 	},
 	odin:{
 		Exception:require('../lib/Exception'),
@@ -14,56 +14,52 @@ var lib = {
 describe('SchemaField', function() {
 	describe('#constructor()', function() {
 		it('should throw on bad parameters', function() {
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.SchemaField();
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.SchemaField({});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.SchemaField({foo:'bar'});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.SchemaField({
 					name:null,
 					validator:lib.deps.joi.string().required()
 				});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.SchemaField({
 					name:'field',
 					validator:null
 				});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should be correctly initialized', function() {
-			let id;
-			let address;
-			(function() {
-				id = new lib.odin.SchemaField({
-					name:'id',
-					validator:lib.deps.joi.number().required(),
-					readOnly:true
-				});
+			let id = new lib.odin.SchemaField({
+				name:'id',
+				validator:lib.deps.joi.number().required(),
+				readOnly:true
+			});
 
-				address = new lib.odin.SchemaField({
-					name:'address',
-					validator:lib.deps.joi.string().required()
-				});
-			}).should.not.throw();
+			let address = new lib.odin.SchemaField({
+				name:'address',
+				validator:lib.deps.joi.string().required()
+			});
 
-			id.should.have.an.enumerable('name').which.is.equal('id');
-			id.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			id.should.have.an.enumerable('readOnly').which.is.equal(true);
+			lib.deps.expect(id).to.have.a.property('name', 'id');
+			lib.deps.expect(id).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(id).to.have.a.property('readOnly', true);
 
-			address.should.have.an.enumerable('name').which.is.equal('address');
-			address.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			address.should.have.an.enumerable('readOnly').which.is.equal(false);
+			lib.deps.expect(address).to.have.a.property('name', 'address');
+			lib.deps.expect(address).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(address).to.have.a.property('readOnly', false);
 		});
 	});
 });

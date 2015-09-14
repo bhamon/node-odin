@@ -1,8 +1,8 @@
 'use strict';
 
-var lib = {
+let lib = {
 	deps:{
-		should:require('should')
+		expect:require('chai').expect
 	},
 	odin:{
 		Exception:require('../lib/Exception')
@@ -13,21 +13,22 @@ describe('Exception', function() {
 	describe('#constructor()', function() {
 		it('should be correctly default initialized', function() {
 			var ex = new lib.odin.Exception();
-			ex.should.have.a.property('name').which.is.an.instanceof(String).and.equal('Exception');
-			ex.should.have.a.property('stack').which.is.an.instanceof(String).and.is.not.empty;
-			ex.should.have.a.property('message').which.is.an.instanceof(String).and.equal('');
-			ex.should.have.a.property('details').which.is.an.instanceof(Object);
-			ex.should.have.a.property('cause');
+
+			lib.deps.expect(ex).to.have.a.property('name', 'Exception');
+			lib.deps.expect(ex).to.have.a.property('stack').that.is.a('string').and.is.not.empty;
+			lib.deps.expect(ex).to.have.a.property('message', '');
+			lib.deps.expect(ex).to.have.a.property('details').that.is.an('object');
+			lib.deps.expect(ex).to.have.a.property('cause').that.is.null;
 		});
 
 		it('should be correctly initialized', function() {
 			var ex = new lib.odin.Exception('message', {foo:'bar'}, new Error());
 
-			ex.should.have.a.property('name').which.is.an.instanceof(String).and.equal('Exception');
-			ex.should.have.a.property('stack').which.is.an.instanceof(String).and.is.not.empty;
-			ex.should.have.a.property('message').which.is.an.instanceof(String).and.equal('message');
-			ex.should.have.a.property('details').which.is.an.instanceof(Object).and.deepEqual({foo:'bar'});
-			ex.should.have.a.property('cause').which.is.an.instanceof(Error);
+			lib.deps.expect(ex).to.have.a.property('name', 'Exception');
+			lib.deps.expect(ex).to.have.a.property('stack').that.is.a('string').and.is.not.empty;
+			lib.deps.expect(ex).to.have.a.property('message', 'message');
+			lib.deps.expect(ex).to.have.a.property('details').that.deep.equal({foo:'bar'});
+			lib.deps.expect(ex).to.have.a.property('cause').that.is.an.instanceof(Error);
 		});
 	});
 });

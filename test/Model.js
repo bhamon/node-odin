@@ -1,12 +1,12 @@
 'use strict';
 
-var lib = {
+let lib = {
 	node:{
 		events:require('events')
 	},
 	deps:{
 		joi:require('joi'),
-		should:require('should')
+		expect:require('chai').expect
 	},
 	odin:{
 		Exception:require('../lib/Exception'),
@@ -18,26 +18,26 @@ var lib = {
 describe('Model', function() {
 	describe('#constructor()', function() {
 		it('should throw on bad parameter', function() {
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Model();
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Model(
 					new lib.odin.Schema(false, [
 						{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
 						{name:'name', validator:lib.deps.joi.string().required()}
 					])
 				);
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Model({}, {});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should prevent abstract construction', function() {
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Model(
 					new lib.odin.Schema(true, [
 						{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
@@ -48,33 +48,30 @@ describe('Model', function() {
 						name:'Jane Doe'
 					}
 				);
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should be correctly initialized and populated', function() {
-			(function() {
-				var instance = new lib.odin.Model(
-					new lib.odin.Schema(false, [
-						{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-						{name:'name', validator:lib.deps.joi.string().required()}
-					]),
-					{
-						id:21,
-						name:'Jane Doe'
-					}
-				);
+			let instance = new lib.odin.Model(
+				new lib.odin.Schema(false, [
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]),
+				{
+					id:21,
+					name:'Jane Doe'
+				}
+			);
 
-				instance.should.be.instanceof(lib.node.events.EventEmitter);
-				instance.should.have.a.property('schema').instanceof(lib.odin.Schema);
-				instance.should.have.an.enumerable('id');
-				instance.should.have.an.enumerable('name');
-			}).should.not.throw();
-
+			lib.deps.expect(instance).to.be.an.instanceof(lib.node.events.EventEmitter);
+			lib.deps.expect(instance).to.have.a.property('schema').that.is.an.instanceof(lib.odin.Schema);
+			lib.deps.expect(instance).to.have.a.property('id');
+			lib.deps.expect(instance).to.have.a.property('name');
 		});
 	});
 
 	describe('#validate()', function() {
-		var instance = new lib.odin.Model(
+		let instance = new lib.odin.Model(
 			new lib.odin.Schema(false, [
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
 				{name:'name', validator:lib.deps.joi.string().required()}
@@ -86,15 +83,15 @@ describe('Model', function() {
 		);
 
 		it('should validate the model instance', function() {
-			(function() {
+			lib.deps.expect(function() {
 				instance.validate();
-			}).should.not.throw();
+			}).to.not.throw();
 		});
 	});
 
 	describe('.create()', function() {
 		it('should create a new model', function() {
-			var model = lib.odin.Model.create({
+			let model = lib.odin.Model.create({
 				abstract:true,
 				init:function() {
 					this.extra = true;

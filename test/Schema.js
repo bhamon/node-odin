@@ -1,9 +1,9 @@
 'use strict';
 
-var lib = {
+let lib = {
 	deps:{
 		joi:require('joi'),
-		should:require('should')
+		expect:require('chai').expect
 	},
 	odin:{
 		Exception:require('../lib/Exception'),
@@ -15,51 +15,48 @@ var lib = {
 describe('Schema', function() {
 	describe('#constructor()', function() {
 		it('should throw on bad parameters', function() {
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Schema();
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Schema(true);
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Schema({}, []);
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Schema(true, [], {});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 
-			(function() {
+			lib.deps.expect(function() {
 				new lib.odin.Schema(false, [
 					{foo:'bar'}
 				]);
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should be correctly initialized', function() {
-			let base;
-			let schema;
-			(function() {
-				base = new lib.odin.Schema(true, [
-					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-					{name:'name', validator:lib.deps.joi.string().required()}
-				]);
-				schema = new lib.odin.Schema(false, [
-					{name:'address', validator:lib.deps.joi.string().required()}
-				], base);
-			}).should.not.throw();
+			let base = new lib.odin.Schema(true, [
+				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+				{name:'name', validator:lib.deps.joi.string().required()}
+			]);
 
-			base.should.have.an.enumerable('abstract').which.is.equal(true);
-			base.should.have.an.enumerable('parent').which.is.null;
+			let schema = new lib.odin.Schema(false, [
+				{name:'address', validator:lib.deps.joi.string().required()}
+			], base);
 
-			(function() {
+			lib.deps.expect(base).to.have.a.property('abstract', true);
+			lib.deps.expect(base).to.have.a.property('parent', null);
+
+			lib.deps.expect(function() {
 				base.abstract = true;
-			}).should.throw(TypeError);
+			}).to.throw(TypeError);
 
-			schema.should.have.an.enumerable('abstract').which.is.equal(false);
-			schema.should.have.an.enumerable('parent').which.is.an.instanceof(lib.odin.Schema);
+			lib.deps.expect(schema).to.have.a.property('abstract', false);
+			lib.deps.expect(schema).to.have.a.property('parent').that.is.an.instanceof(lib.odin.Schema);
 		});
 	});
 
@@ -73,12 +70,12 @@ describe('Schema', function() {
 		});
 
 		it('should not detect missing fields', function() {
-			schema.hasField('test').should.be.equal(false);
+			lib.deps.expect(schema.hasField('test')).to.equal(false);
 		});
 
 		it('should detect provided fields', function() {
-			schema.hasField('id').should.be.equal(true);
-			schema.hasField('name').should.be.equal(true);
+			lib.deps.expect(schema.hasField('id')).to.equal(true);
+			lib.deps.expect(schema.hasField('name')).to.equal(true);
 		});
 	});
 
@@ -90,6 +87,7 @@ describe('Schema', function() {
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
 				{name:'name', validator:lib.deps.joi.string().required()}
 			]);
+
 			child = new lib.odin.Schema(false, [
 				{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
 				{name:'address', validator:lib.deps.joi.string().required()}
@@ -97,61 +95,61 @@ describe('Schema', function() {
 		});
 
 		it('should not return missing fields', function() {
-			lib.deps.should.equal(schema.getField('test'), null);
+			lib.deps.expect(schema.getField('test')).to.be.null;
 		});
 
 		it('should return provided fields', function() {
 			let id = schema.getField('id');
-			id.should.be.an.Object;
-			id.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('id');
-			id.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			id.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
+			lib.deps.expect(id).to.be.an('object');
+			lib.deps.expect(id).to.have.a.property('name', 'id');
+			lib.deps.expect(id).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(id).to.have.a.property('readOnly', true);
 
 			let name = schema.getField('name');
-			name.should.be.an.Object;
-			name.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('name');
-			name.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			name.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(false);
+			lib.deps.expect(name).to.be.an('object');
+			lib.deps.expect(name).to.have.a.property('name', 'name');
+			lib.deps.expect(name).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(name).to.have.a.property('readOnly', false);
 		});
 
 		it('should return inalterable fields', function() {
 			let id = schema.getField('id');
 
-			(function() {
+			lib.deps.expect(function() {
 				id.name = 'test';
-			}).should.throw(TypeError);
+			}).to.throw(TypeError);
 
-			(function() {
+			lib.deps.expect(function() {
 				id.validator = lib.deps.joi.boolean();
-			}).should.throw(TypeError);
+			}).to.throw(TypeError);
 
-			(function() {
+			lib.deps.expect(function() {
 				id.readOnly = true;
-			}).should.throw(TypeError);
+			}).to.throw(TypeError);
 		});
 
 		it('should return children fields', function() {
 			let address = child.getField('address');
-			address.should.be.an.Object;
-			address.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('address');
-			address.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			address.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(false);
+			lib.deps.expect(address).to.be.an('object');
+			lib.deps.expect(address).to.have.a.property('name', 'address');
+			lib.deps.expect(address).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(address).to.have.a.property('readOnly', false);
 		});
 
 		it('should return parent fields', function() {
 			let id = child.getField('id');
-			id.should.be.an.Object;
-			id.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('id');
-			id.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			id.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
+			lib.deps.expect(id).to.be.an('object');
+			lib.deps.expect(id).to.have.a.property('name', 'id');
+			lib.deps.expect(id).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(id).to.have.a.property('readOnly', true);
 		});
 
 		it('should return overriden fields', function() {
 			let name = child.getField('name');
-			name.should.be.an.Object;
-			name.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('name');
-			name.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			name.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
+			lib.deps.expect(name).to.be.an('object');
+			lib.deps.expect(name).to.have.a.property('name', 'name');
+			lib.deps.expect(name).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(name).to.have.a.property('readOnly', true);
 		});
 	});
 
@@ -163,6 +161,7 @@ describe('Schema', function() {
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
 				{name:'name', validator:lib.deps.joi.string().required()}
 			]);
+
 			child = new lib.odin.Schema(false, [
 				{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
 				{name:'address', validator:lib.deps.joi.string().required()}
@@ -172,26 +171,26 @@ describe('Schema', function() {
 		it('should return all the provided fields with inheritance support', function() {
 			let fields = child.collectFields();
 
-			fields.should.be.an.instanceof(Map);
-			fields.size.should.be.equal(3);
+			lib.deps.expect(fields).to.be.an.instanceof(Map);
+			lib.deps.expect(fields).to.have.a.property('size', 3);
 
 			let id = fields.get('id');
-			id.should.be.an.instanceof(lib.odin.SchemaField);
-			id.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('id');
-			id.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			id.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
+			lib.deps.expect(id).to.be.an('object');
+			lib.deps.expect(id).to.have.a.property('name', 'id');
+			lib.deps.expect(id).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(id).to.have.a.property('readOnly', true);
 
 			let name = fields.get('name');
-			name.should.be.an.instanceof(lib.odin.SchemaField);
-			name.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('name');
-			name.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			name.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(true);
+			lib.deps.expect(name).to.be.an('object');
+			lib.deps.expect(name).to.have.a.property('name', 'name');
+			lib.deps.expect(name).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(name).to.have.a.property('readOnly', true);
 
 			let address = fields.get('address');
-			address.should.be.an.instanceof(lib.odin.SchemaField);
-			address.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('address');
-			address.should.have.an.enumerable('validator').which.is.an.instanceof(Object);
-			address.should.have.an.enumerable('readOnly').which.is.an.instanceof(Boolean).and.equal(false);
+			lib.deps.expect(address).to.be.an('object');
+			lib.deps.expect(address).to.have.a.property('name', 'address');
+			lib.deps.expect(address).to.have.a.property('validator').that.is.an('object');
+			lib.deps.expect(address).to.have.a.property('readOnly', false);
 		});
 	});
 
@@ -204,6 +203,7 @@ describe('Schema', function() {
 				{name:'stub', validator:lib.deps.joi.string().required()},
 				{name:'name', validator:lib.deps.joi.string().required()}
 			]);
+
 			child = new lib.odin.Schema(false, [
 				{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
 				{name:'address', validator:lib.deps.joi.string().required()}
@@ -219,24 +219,25 @@ describe('Schema', function() {
 				extra:'foo'
 			});
 
-			instance.should.have.an.enumerable('id').which.is.an.instanceof(Number).and.equal(2);
-			instance.should.have.an.enumerable('stub').which.is.undefined;
-			instance.should.have.an.enumerable('name').which.is.an.instanceof(String).and.equal('John Doe');
-			instance.should.have.an.enumerable('address').which.is.an.instanceof(String).and.equal('1, Potato Plazza, Roma');
-			instance.should.not.have.an.enumerable('extra');
+			lib.deps.expect(instance).to.have.a.property('id', 2);
+			lib.deps.expect(instance).to.have.a.property('stub').that.is.undefined;
+			lib.deps.expect(instance).to.have.a.property('name', 'John Doe');
+			lib.deps.expect(instance).to.have.a.property('address', '1, Potato Plazza, Roma');
+			lib.deps.expect(instance).to.not.have.a.property('extra');
 
-			(function() {
+			lib.deps.expect(function() {
 				instance.id = 25;
-			}).should.throw(TypeError);
+			}).to.throw(TypeError);
 
-			(function() {
+			lib.deps.expect(function() {
 				instance.name = 'Jane Doe';
-			}).should.throw(TypeError);
+			}).to.throw(TypeError);
 
-			(function() {
+			lib.deps.expect(function() {
 				instance.address = '221b, Baker street, London';
-				instance.address.should.be.equal('221b, Baker street, London');
-			}).should.not.throw();
+			}).to.not.throw();
+
+			lib.deps.expect(instance).to.have.a.property('address', '221b, Baker street, London');
 		});
 	});
 
@@ -248,6 +249,7 @@ describe('Schema', function() {
 				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
 				{name:'name', validator:lib.deps.joi.string().required()}
 			]);
+
 			child = new lib.odin.Schema(false, [
 				{name:'name', validator:lib.deps.joi.string().required().uppercase().min(4), readOnly:true},
 				{name:'address', validator:lib.deps.joi.string().required().uppercase()},
@@ -257,31 +259,31 @@ describe('Schema', function() {
 		});
 
 		it('should detect invalid fields', function() {
-			(function() {
+			lib.deps.expect(function() {
 				schema.validate({
 					id:'test'
 				});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should detect invalid parent fields', function() {
-			(function() {
+			lib.deps.expect(function() {
 				child.validate({
 					id:10,
 					name:'John Doe',
 					address:25
 				});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should detect invalid overriden fields', function() {
-			(function() {
+			lib.deps.expect(function() {
 				child.validate({
 					id:10,
 					name:'Joe',
 					address:'1, rue de Paris'
 				});
-			}).should.throw(lib.odin.Exception);
+			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should auto-correct fields', function() {
@@ -292,14 +294,14 @@ describe('Schema', function() {
 				extraReadOnly:'foo'
 			};
 
-			(function() {
+			lib.deps.expect(function() {
 				child.validate(instance);
-			}).should.not.throw();
+			}).to.not.throw();
 
-			instance.name.should.be.equal('John Doe');
-			instance.address.should.be.equal('1, RUE DE PARIS');
-			instance.should.have.a.property('extra').which.is.an.instanceof(String).and.is.equal('test');
-			instance.should.have.a.property('extraReadOnly').which.is.an.instanceof(String).and.is.equal('foo');
+			lib.deps.expect(instance).to.have.a.property('name', 'John Doe');
+			lib.deps.expect(instance).to.have.a.property('address', '1, RUE DE PARIS');
+			lib.deps.expect(instance).to.have.a.property('extra', 'test');
+			lib.deps.expect(instance).to.have.a.property('extraReadOnly', 'foo');
 		});
 	});
 });
