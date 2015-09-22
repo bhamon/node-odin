@@ -15,7 +15,7 @@ let lib = {
 lib.deps.chai.use(require('chai-as-promised'));
 
 describe('util', function() {
-	describe('validate', function() {
+	describe('.validate()', function() {
 		it('should throw on bad parameters', function() {
 			lib.deps.expect(function() {
 				lib.odin.util.validate();

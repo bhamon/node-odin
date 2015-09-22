@@ -17,7 +17,7 @@ let lib = {
 lib.deps.chai.use(require('chai-as-promised'));
 
 describe('init', function() {
-	describe('bootstrap', function() {
+	describe('.bootstrap()', function() {
 		it('should correctly load init scripts', function() {
 			const INIT_DIR = 'init_ok';
 			let script01 = require('./' + INIT_DIR + '/01_initScript.js');
