@@ -24,29 +24,35 @@ describe('Schema', function() {
 			}).to.throw(lib.odin.Exception);
 
 			lib.deps.expect(function() {
-				new lib.odin.Schema({}, []);
+				new lib.odin.Schema({
+					abstract:true
+				});
 			}).to.throw(lib.odin.Exception);
 
 			lib.deps.expect(function() {
-				new lib.odin.Schema(true, [], {});
-			}).to.throw(lib.odin.Exception);
-
-			lib.deps.expect(function() {
-				new lib.odin.Schema(false, [
-					{foo:'bar'}
-				]);
+				new lib.odin.Schema({
+					parent:'test',
+					abstract:false,
+					fields:[]
+				});
 			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should be correctly initialized', function() {
-			let base = new lib.odin.Schema(true, [
-				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-				{name:'name', validator:lib.deps.joi.string().required()}
-			]);
+			let base = new lib.odin.Schema({
+				abstract:true,
+				fields:[
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]
+			});
 
-			let schema = new lib.odin.Schema(false, [
-				{name:'address', validator:lib.deps.joi.string().required()}
-			], base);
+			let schema = new lib.odin.Schema({
+				parent:base,
+				fields:[
+					{name:'address', validator:lib.deps.joi.string().required()}
+				]
+			});
 
 			lib.deps.expect(base).to.have.a.property('abstract', true);
 			lib.deps.expect(base).to.have.a.property('parent', null);
@@ -63,10 +69,12 @@ describe('Schema', function() {
 	describe('#hasField()', function() {
 		let schema;
 		before(function() {
-			schema = new lib.odin.Schema(false, [
-				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-				{name:'name', validator:lib.deps.joi.string().required()}
-			]);
+			schema = new lib.odin.Schema({
+				fields:[
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]
+			});
 		});
 
 		it('should not detect missing fields', function() {
@@ -83,15 +91,20 @@ describe('Schema', function() {
 		let schema;
 		let child;
 		before(function() {
-			schema = new lib.odin.Schema(false, [
-				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-				{name:'name', validator:lib.deps.joi.string().required()}
-			]);
+			schema = new lib.odin.Schema({
+				fields:[
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]
+			});
 
-			child = new lib.odin.Schema(false, [
-				{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
-				{name:'address', validator:lib.deps.joi.string().required()}
-			], schema);
+			child = new lib.odin.Schema({
+				parent:schema,
+				fields:[
+					{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
+					{name:'address', validator:lib.deps.joi.string().required()}
+				]
+			});
 		});
 
 		it('should not return missing fields', function() {
@@ -157,15 +170,20 @@ describe('Schema', function() {
 		let schema;
 		let child;
 		before(function() {
-			schema = new lib.odin.Schema(false, [
-				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-				{name:'name', validator:lib.deps.joi.string().required()}
-			]);
+			schema = new lib.odin.Schema({
+				fields:[
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]
+			});
 
-			child = new lib.odin.Schema(false, [
-				{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
-				{name:'address', validator:lib.deps.joi.string().required()}
-			], schema);
+			child = new lib.odin.Schema({
+				parent:schema,
+				fields:[
+					{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
+					{name:'address', validator:lib.deps.joi.string().required()}
+				]
+			});
 		});
 
 		it('should return all the provided fields with inheritance support', function() {
@@ -198,16 +216,21 @@ describe('Schema', function() {
 		let schema;
 		let child;
 		before(function() {
-			schema = new lib.odin.Schema(false, [
-				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-				{name:'stub', validator:lib.deps.joi.string().required()},
-				{name:'name', validator:lib.deps.joi.string().required()}
-			]);
+			schema = new lib.odin.Schema({
+				fields:[
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'stub', validator:lib.deps.joi.string().required()},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]
+			});
 
-			child = new lib.odin.Schema(false, [
-				{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
-				{name:'address', validator:lib.deps.joi.string().required()}
-			], schema);
+			child = new lib.odin.Schema({
+				parent:schema,
+				fields:[
+					{name:'name', validator:lib.deps.joi.string().required(), readOnly:true},
+					{name:'address', validator:lib.deps.joi.string().required()}
+				]
+			});
 		});
 
 		it('should populate the provided object', function() {
@@ -245,17 +268,22 @@ describe('Schema', function() {
 		let schema;
 		let child;
 		before(function() {
-			schema = new lib.odin.Schema(false, [
-				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-				{name:'name', validator:lib.deps.joi.string().required()}
-			]);
+			schema = new lib.odin.Schema({
+				fields:[
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]
+			});
 
-			child = new lib.odin.Schema(false, [
-				{name:'name', validator:lib.deps.joi.string().required().uppercase().min(4), readOnly:true},
-				{name:'address', validator:lib.deps.joi.string().required().uppercase()},
-				{name:'extra', validator:lib.deps.joi.string().optional().default('test')},
-				{name:'extraReadOnly', validator:lib.deps.joi.string().optional().default('test'), readOnly:true}
-			], schema);
+			child = new lib.odin.Schema({
+				parent:schema,
+				fields:[
+					{name:'name', validator:lib.deps.joi.string().required().uppercase().min(4), readOnly:true},
+					{name:'address', validator:lib.deps.joi.string().required().uppercase()},
+					{name:'extra', validator:lib.deps.joi.string().optional().default('test')},
+					{name:'extraReadOnly', validator:lib.deps.joi.string().optional().default('test'), readOnly:true}
+				]
+			});
 		});
 
 		it('should detect invalid fields', function() {

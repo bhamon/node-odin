@@ -53,10 +53,12 @@ describe('Model', function() {
 
 		it('should be correctly initialized and populated', function() {
 			let instance = new lib.odin.Model(
-				new lib.odin.Schema(false, [
-					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-					{name:'name', validator:lib.deps.joi.string().required()}
-				]),
+				new lib.odin.Schema({
+					fields:[
+						{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+						{name:'name', validator:lib.deps.joi.string().required()}
+					]
+				}),
 				{
 					id:21,
 					name:'Jane Doe'
@@ -72,10 +74,12 @@ describe('Model', function() {
 
 	describe('#validate()', function() {
 		let instance = new lib.odin.Model(
-			new lib.odin.Schema(false, [
-				{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-				{name:'name', validator:lib.deps.joi.string().required()}
-			]),
+			new lib.odin.Schema({
+				fields:[
+					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
+					{name:'name', validator:lib.deps.joi.string().required()}
+				]
+			}),
 			{
 				id:21,
 				name:'Jane Doe'
