@@ -1,9 +1,6 @@
 'use strict';
 
 let lib = {
-	node:{
-		events:require('events')
-	},
 	deps:{
 		joi:require('joi'),
 		expect:require('chai').expect
@@ -65,7 +62,7 @@ describe('Model', function() {
 				}
 			);
 
-			lib.deps.expect(instance).to.be.an.instanceof(lib.node.events.EventEmitter);
+			lib.deps.expect(instance).to.be.an.instanceof(lib.odin.Model);
 			lib.deps.expect(instance).to.have.a.property('schema').that.is.an.instanceof(lib.odin.Schema);
 			lib.deps.expect(instance).to.have.a.property('id');
 			lib.deps.expect(instance).to.have.a.property('name');
