@@ -6,102 +6,123 @@ let lib = {
 		expect:require('chai').expect
 	},
 	odin:{
+		constants:require('../lib/constants'),
 		Exception:require('../lib/Exception'),
-		Schema:require('../lib/Schema'),
+		util:require('../lib/util'),
 		Model:require('../lib/Model')
 	}
 };
 
 describe('Model', function() {
 	describe('#constructor()', function() {
+		class Person extends lib.odin.Model {
+			constructor(p_data) {
+				super(p_data);
+			}
+
+			[lib.odin.Model.SYMBOL_METHOD_POPULATE](p_data) {
+				this[lib.odin.Model.SYMBOL_MEMBER_DATA].set('id', lib.odin.util.validate(p_data.id, lib.deps.joi.number().optional().integer().min(0)));
+				this.firstName = p_data.firstName;
+				this.lastName = p_data.lastName;
+
+				this[lib.odin.Model.SYMBOL_METHOD_CREATE_ASSOCIATION]('addresses', lib.odin.constants.ASSOCIATION_TYPE_ARRAY);
+			}
+
+			get id() {
+				return this[lib.odin.Model.SYMBOL_MEMBER_DATA].get('id');
+			}
+
+			get firstName() {
+				return this[lib.odin.Model.SYMBOL_MEMBER_DATA].get('firstName');
+			}
+
+			set firstName(p_value) {
+				let value = lib.odin.util.validate(p_value, lib.deps.joi.string().required().min(1));
+				this[lib.odin.Model.SYMBOL_MEMBER_DATA].set('firstName', value);
+			}
+
+			get lastName() {
+				return this[lib.odin.Model.SYMBOL_MEMBER_DATA].get('lastName');
+			}
+
+			set lastName(p_value) {
+				let value = lib.odin.util.validate(p_value, lib.deps.joi.string().required().min(1));
+				this[lib.odin.Model.SYMBOL_MEMBER_DATA].set('lastName', value);
+			}
+
+			get addresses() {
+				return this[lib.odin.Model.SYMBOL_MEMBER_ASSOCIATIONS].get('addresses').values();
+			}
+
+			addAddress(p_address) {
+				this[lib.odin.Model.SYMBOL_MEMBER_ASSOCIATIONS].get('addresses').push(p_address);
+			}
+		}
+
+		class User extends Person {
+			constructor(p_data) {
+				super(p_data);
+			}
+
+			[lib.odin.Model.SYMBOL_METHOD_POPULATE](p_data) {
+				super[lib.odin.Model.SYMBOL_METHOD_POPULATE](p_data);
+
+				this[lib.odin.Model.SYMBOL_MEMBER_DATA].set('active', true);
+				this.login = p_data.login;
+				this[lib.odin.Model.SYMBOL_MEMBER_DATA].set('password', lib.odin.util.validate(p_data.password, lib.deps.joi.string().required().regex(/^[a-f0-9]{8}$/)));
+			}
+
+			get active() {
+				return this[lib.odin.Model.SYMBOL_MEMBER_DATA].get('active');
+			}
+
+			get login() {
+				return this[lib.odin.Model.SYMBOL_MEMBER_DATA].get('login');
+			}
+
+			set login(p_value) {
+				let value = lib.odin.util.validate(p_value, lib.deps.joi.string().required().regex(/^[a-zA-Z0-9-]{4,12}$/));
+				this[lib.odin.Model.SYMBOL_MEMBER_DATA].set('login', value);
+			}
+
+			get password() {
+				return this[lib.odin.Model.SYMBOL_MEMBER_DATA].get('password');
+			}
+
+			set password(p_value) {
+				let value = lib.odin.util.validate(p_value, lib.deps.joi.string().required().min(8));
+
+				// Pseudo hash, real hash is required here.
+				value = value.replace(/[^a-f0-9]/, '0');
+
+				this[lib.odin.Model.SYMBOL_MEMBER_DATA].set('password', value);
+			}
+		}
+
 		it('should throw on bad parameter', function() {
 			lib.deps.expect(function() {
-				new lib.odin.Model();
-			}).to.throw(lib.odin.Exception);
-
-			lib.deps.expect(function() {
-				new lib.odin.Model(
-					new lib.odin.Schema(false, [
-						{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-						{name:'name', validator:lib.deps.joi.string().required()}
-					])
-				);
-			}).to.throw(lib.odin.Exception);
-
-			lib.deps.expect(function() {
-				new lib.odin.Model({}, {});
-			}).to.throw(lib.odin.Exception);
-		});
-
-		it('should prevent abstract construction', function() {
-			lib.deps.expect(function() {
-				new lib.odin.Model(
-					new lib.odin.Schema(true, [
-						{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-						{name:'name', validator:lib.deps.joi.string().required()}
-					]),
-					{
-						id:21,
-						name:'Jane Doe'
-					}
-				);
+				new User(21);
 			}).to.throw(lib.odin.Exception);
 		});
 
 		it('should be correctly initialized and populated', function() {
-			let instance = new lib.odin.Model(
-				new lib.odin.Schema({
-					fields:[
-						{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-						{name:'name', validator:lib.deps.joi.string().required()}
-					]
-				}),
-				{
-					id:21,
-					name:'Jane Doe'
-				}
-			);
-
-			lib.deps.expect(instance).to.be.an.instanceof(lib.odin.Model);
-			lib.deps.expect(instance).to.have.a.property('schema').that.is.an.instanceof(lib.odin.Schema);
-			lib.deps.expect(instance).to.have.a.property('id');
-			lib.deps.expect(instance).to.have.a.property('name');
-		});
-	});
-
-	describe('#validate()', function() {
-		let instance = new lib.odin.Model(
-			new lib.odin.Schema({
-				fields:[
-					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-					{name:'name', validator:lib.deps.joi.string().required()}
-				]
-			}),
-			{
-				id:21,
-				name:'Jane Doe'
-			}
-		);
-
-		it('should validate the model instance', function() {
+			let instance;
 			lib.deps.expect(function() {
-				instance.validate();
+				instance = new User({
+					id:2,
+					firstName:'Jane',
+					lastName:'Doe',
+					login:'janeDoe',
+					password:'2590b56d'
+				});
 			}).to.not.throw();
-		});
-	});
 
-	describe('.create()', function() {
-		it('should create a new model', function() {
-			let model = lib.odin.Model.create({
-				abstract:true,
-				init:function() {
-					this.extra = true;
-				},
-				fields:[
-					{name:'id', validator:lib.deps.joi.number().required(), readOnly:true},
-					{name:'name', validator:lib.deps.joi.string().required()}
-				]
-			});
+			lib.deps.expect(instance).to.have.a.property('id', 2);
+			lib.deps.expect(instance).to.have.a.property('firstName', 'Jane');
+			lib.deps.expect(instance).to.have.a.property('lastName', 'Doe');
+			lib.deps.expect(instance).to.have.a.property('active', true);
+			lib.deps.expect(instance).to.have.a.property('login', 'janeDoe');
+			lib.deps.expect(instance).to.have.a.property('password', '2590b56d');
 		});
 	});
 });
