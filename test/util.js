@@ -251,5 +251,64 @@ describe('util', function() {
 				return lib.deps.expect(lib.odin.util.promise.ninvoke(obj, 'nError')).to.be.rejectedWith(Error, {message:'pati4tobata'});
 			});
 		});
+
+		describe('.denodeify()', function() {
+			it('should return a correct promise', function() {
+				let dnFn = lib.odin.util.promise.denodeify(nFn);
+				return lib.deps.expect(dnFn()).to.eventually.equal('hellow');
+			});
+
+			it('should handle empty result', function() {
+				let dnFnEmpty = lib.odin.util.promise.denodeify(nFnEmpty);
+				return lib.deps.expect(dnFnEmpty()).to.be.fulfilled;
+			});
+
+			it('should handle multiple results', function() {
+				let dnFnMultiple = lib.odin.util.promise.denodeify(nFnMultiple);
+				return lib.deps.expect(dnFnMultiple()).to.eventually.deep.equal(['hellow', 'banana']);
+			});
+
+			it('should forward arguments', function() {
+				let dnFnParam = lib.odin.util.promise.denodeify(nFnParam);
+				return lib.deps.expect(dnFnParam('stuart', 'lollipop')).to.eventually.equal('hellow stuart, do you want a lollipop?');
+			});
+
+			it('should forward exceptions', function() {
+				let dnFnError = lib.odin.util.promise.denodeify(nFnError);
+				return lib.deps.expect(dnFnError()).to.be.rejectedWith(lib.odin.Exception, {message:'test'});
+			});
+		});
+
+		describe('.nodeify()', function() {
+			let pFn = function() { return Promise.resolve('patata'); };
+			let pFnError = function() { return Promise.reject(new Error('patitobata')); };
+
+			it('should call the provided callback', function(p_done) {
+				let npFn = lib.odin.util.promise.nodeify(pFn);
+
+				npFn(function(p_error, p_value) {
+					try {
+						lib.deps.expect(p_error).to.be.null;
+						lib.deps.expect(p_value).to.be.equal('patata');
+
+						p_done();
+					} catch(p_error) {
+						p_done(p_error);
+					}
+				});
+			});
+
+			it('should forward exceptions', function(p_done) {
+				let npFnError = lib.odin.util.promise.nodeify(pFnError);
+				npFnError(function(p_error) {
+					try {
+						lib.deps.expect(p_error).to.be.an('Error');
+						p_done();
+					} catch(p_error) {
+						p_done(p_error);
+					}
+				});
+			});
+		});
 	});
 });
