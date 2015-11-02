@@ -5,6 +5,7 @@ let lib = {
 		expect:require('chai').expect
 	},
 	odin:{
+		Exception:require('../lib/Exception'),
 		Enum:require('../lib/Enum'),
 		EnumSymbol:require('../lib/EnumSymbol')
 	}
@@ -42,6 +43,20 @@ describe('Enum', function() {
 			for(let symbol of symbols) {
 				lib.deps.expect(symbol).to.be.an.instanceof(lib.odin.EnumSymbol);
 			}
+		});
+	});
+
+	describe('#values()', function() {
+		it('should throw for unknown symbols', function() {
+			lib.deps.expect(function() {
+				e.forKey('ANOTHER');
+			}).to.throw(lib.odin.Exception);
+		});
+
+		it('should returns correct symbols', function() {
+			lib.deps.expect(e.forKey('FOO')).to.equal(e.FOO);
+			lib.deps.expect(e.forKey('BAR')).to.equal(e.BAR);
+			lib.deps.expect(e.forKey('TEST')).to.equal(e.TEST);
 		});
 	});
 });
